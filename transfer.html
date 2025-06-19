@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Transfer na frontu</title>
+  <meta charset="UTF-8">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 1em;
+    }
+    select, button {
+      margin-top: 0.5em;
+      padding: 0.5em;
+      font-size: 16px;
+    }
+    .closed {
+      color: red;
+    }
+    .open {
+      color: green;
+    }
+  </style>
+</head>
+<body>
+  <label for="queueSelect">Vyber frontu:</label>
+  <select id="queueSelect"></select>
+  <br/>
+  <button id="transferBtn" disabled>Přepojit zákazníka</button>
+
+  <script>
+    const queues = [
+      { id: "q-abc123", name: "Podpora CZ", isOpen: true },
+      { id: "q-def456", name: "Reklamace", isOpen: false },
+      { id: "q-ghi789", name: "Technická podpora", isOpen: true }
+    ];
+
+    const select = document.getElementById('queueSelect');
+    const btn = document.getElementById('transferBtn');
+
+    queues.forEach(queue => {
+      const option = document.createElement('option');
+      option.value = queue.id;
+      option.textContent = `${queue.name} (${queue.isOpen ? 'otevřená' : 'zavřená'})`;
+      option.className = queue.isOpen ? 'open' : 'closed';
+      select.appendChild(option);
+    });
+
+    select.addEventListener('change', () => {
+      const selectedId = select.value;
+      const selectedQueue = queues.find(q => q.id === selectedId);
+      btn.disabled = !(selectedQueue && selectedQueue.isOpen);
+    });
+
+    btn.addEventListener('click', () => {
+      const selectedId = select.value;
+      if (selectedId && window.parent.Scripter && window.parent.Scripter.BlindTransfer) {
+        window.parent.Scripter.BlindTransfer(selectedId);
+      } else {
+        alert(\"Nelze provést blind transfer. Zkontroluj, že běží ve scriptu agent desktopu.\");
+      }
+    });
+  </script>
+</body>
+</html>
