@@ -6,42 +6,47 @@
   <style>
     body {
       font-family: Arial, sans-serif;
-      padding: 20px;
+      padding: 1em;
     }
     select, button {
-      padding: 0.5em;
       font-size: 16px;
-      margin-top: 1em;
+      margin-top: 0.5em;
+      padding: 0.5em;
     }
     .info {
       margin-top: 1em;
-      font-weight: bold;
     }
   </style>
 </head>
 <body>
-  <h2>Vyber frontu k přepojení</h2>
-  <select id="queueSelect"></select>
-  <div class="info" id="queueInfo"></div>
+  <h2>Vyber frontu</h2>
+  <select id="queueSelect">
+    <option disabled selected>-- Vyber frontu --</option>
+  </select>
+  <div class="info" id="openingInfo"></div>
   <button id="transferBtn" disabled>Přepojit zákazníka</button>
 
   <script>
-    const dropdown = document.getElementById('queueSelect');
-    const info = document.getElementById('queueInfo');
-    const btn = document.getElementById('transferBtn');
+    // Statické demo fronty (v reálném skriptu se nahradí ScripterData.queues)
+    const queues = [
+      { queueId: "q-abc123", queueName: "Podpora CZ", openingHours: "Po–Pá 8:00–16:00" },
+      { queueId: "q-def456", queueName: "Reklamace", openingHours: "Po–Pá 9:00–17:00" },
+      { queueId: "q-ghi789", queueName: "Technická", openingHours: "Denně 0:00–23:59" }
+    ];
 
-    // Pro demo účely použijeme window.parent.ScripterData pokud je k dispozici
-    const queues = (window.parent.ScripterData && window.parent.ScripterData.queues) || [];
+    const select = document.getElementById("queueSelect");
+    const info = document.getElementById("openingInfo");
+    const btn = document.getElementById("transferBtn");
 
-    queues.forEach(queue => {
-      const opt = document.createElement('option');
-      opt.value = queue.queueId;
-      opt.textContent = queue.queueName + " (" + queue.openingHours + ")";
-      dropdown.appendChild(opt);
+    queues.forEach(q => {
+      const opt = document.createElement("option");
+      opt.value = q.queueId;
+      opt.textContent = `${q.queueName} (${q.openingHours})`;
+      select.appendChild(opt);
     });
 
-    dropdown.addEventListener('change', () => {
-      const selected = queues.find(q => q.queueId === dropdown.value);
+    select.addEventListener("change", () => {
+      const selected = queues.find(q => q.queueId === select.value);
       if (selected) {
         info.textContent = "Otevírací doba: " + selected.openingHours;
         btn.disabled = false;
@@ -51,9 +56,9 @@
       }
     });
 
-    btn.addEventListener('click', () => {
-      const queueId = dropdown.value;
-      if (queueId && window.parent.Scripter && typeof window.parent.Scripter.BlindTransfer === "function") {
+    btn.addEventListener("click", () => {
+      const queueId = select.value;
+      if (window.parent?.Scripter?.BlindTransfer) {
         window.parent.Scripter.BlindTransfer(queueId);
       } else {
         alert("BlindTransfer není dostupný.");
