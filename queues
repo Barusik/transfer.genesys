@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Přepojení na frontu</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+    select, button {
+      padding: 0.5em;
+      font-size: 16px;
+      margin-top: 1em;
+    }
+    .info {
+      margin-top: 1em;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <h2>Vyber frontu k přepojení</h2>
+  <select id="queueSelect"></select>
+  <div class="info" id="queueInfo"></div>
+  <button id="transferBtn" disabled>Přepojit zákazníka</button>
+
+  <script>
+    const dropdown = document.getElementById('queueSelect');
+    const info = document.getElementById('queueInfo');
+    const btn = document.getElementById('transferBtn');
+
+    // Pro demo účely použijeme window.parent.ScripterData pokud je k dispozici
+    const queues = (window.parent.ScripterData && window.parent.ScripterData.queues) || [];
+
+    queues.forEach(queue => {
+      const opt = document.createElement('option');
+      opt.value = queue.queueId;
+      opt.textContent = queue.queueName + " (" + queue.openingHours + ")";
+      dropdown.appendChild(opt);
+    });
+
+    dropdown.addEventListener('change', () => {
+      const selected = queues.find(q => q.queueId === dropdown.value);
+      if (selected) {
+        info.textContent = "Otevírací doba: " + selected.openingHours;
+        btn.disabled = false;
+      } else {
+        info.textContent = "";
+        btn.disabled = true;
+      }
+    });
+
+    btn.addEventListener('click', () => {
+      const queueId = dropdown.value;
+      if (queueId && window.parent.Scripter && typeof window.parent.Scripter.BlindTransfer === "function") {
+        window.parent.Scripter.BlindTransfer(queueId);
+      } else {
+        alert("BlindTransfer není dostupný.");
+      }
+    });
+  </script>
+</body>
+</html>
